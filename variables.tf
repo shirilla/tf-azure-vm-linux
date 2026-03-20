@@ -134,6 +134,18 @@ variable "os_disk_type" {
   }
 }
 
+variable "autoshutdown_time" {
+  description = "Daily auto-shutdown time in HHmm 24h format (e.g. '2000' = 8:00 PM). Set to '' to disable auto-shutdown."
+  type        = string
+  default     = "2000"
+}
+
+variable "autoshutdown_timezone" {
+  description = "Timezone for the auto-shutdown schedule. Uses Windows timezone names (e.g. 'Central Standard Time')."
+  type        = string
+  default     = "Central Standard Time"
+}
+
 variable "os_disk_caching" {
   description = "The caching type for the OS disk (None, ReadOnly, ReadWrite)."
   type        = string

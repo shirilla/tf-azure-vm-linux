@@ -115,3 +115,26 @@ resource "azurerm_linux_virtual_machine" "vm" {
   )
 }
 
+#================================================================================
+# Auto Shutdown Schedule
+#================================================================================
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "autoshutdown" {
+  count              = var.autoshutdown_time != "" ? 1 : 0
+  virtual_machine_id = azurerm_linux_virtual_machine.vm.id
+  location           = azurerm_resource_group.rg.location
+  enabled            = true
+
+  daily_recurrence_time = var.autoshutdown_time
+  timezone              = var.autoshutdown_timezone
+
+  notification_settings {
+    enabled = false
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      tf-module = "tf-azure-vm"
+    }
+  )
+}
