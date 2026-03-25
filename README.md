@@ -2,13 +2,13 @@
 I prototype and test solutions almost daily and have created modules that are optimized for the "way that I work".
 
 ---
-This module spins up an Azure VM with (optionally) a public IP address and fqdn. It has other optional variables that I regularly use to spin up an Azure VM for my work:
+This module spins up an Azure VM with (optionally) a public IP address. It has other optional variables that I regularly use to spin up an Azure VM for my work:
 - The cloud-init / user_data bash script path
 - The ssh key of my choosing
 - Tags
 - more...
 
-Once provisioned I can quickly ssh into the VM using the fqdn using my ssh key. No clumsy passwords or looking at outputs for the public IP address. When I login the script will have configured the VM and I will not need to run `apt` or whatever.
+Once provisioned I can quickly ssh into the VM using my ssh key. No clumsy passwords. When I login the script will have configured the VM and I will not need to run `apt` or whatever.
 
 Simplicity is beauty. 
 
@@ -17,8 +17,6 @@ Simplicity is beauty.
 
 These are the variables that I find the most handy:
 
-If `assign_public_ip = true` you can also set `public_dns_zone_name` and `public_dns_zone_rg` to deploy an A record to your Azure-hosted subdomain. 
-
 The `init_script_path` variable is usually the path to a `kubeadm` or `mitm` setup script.
 
 The `tags` variable will get merged with the tags that are are set inside main.tf.
@@ -26,7 +24,7 @@ The `tags` variable will get merged with the tags that are are set inside main.t
 There are also variables for the OS and more, I usually go with the default values.
 
 ---
-# Example: Bastion server with public IP address and public fqdn
+# Example: Bastion server with public IP address
 
 ```tf
 module "bastion_eastus2" {
@@ -44,8 +42,6 @@ module "bastion_eastus2" {
   init_script_path            = "/Users/myprofile/Documents/github/bash_common_tools/startup-with-common-tools.sh"
   assign_public_ip            = true
   public_ip_allocation_method = "Static"
-  public_dns_zone_name        = azurerm_dns_zone.my_public_dns_zone.name
-  public_dns_zone_rg          = azurerm_resource_group.rg_dns.name
   tags = {
     managed-by  = "personal tf project"
     description = "bastion host"
@@ -54,7 +50,7 @@ module "bastion_eastus2" {
 ```
 
 ---
-# Example: server with no public IP address, no public fqdn
+# Example: server with no public IP address
 
 ```tf
 module "kubeadm_eastus2" {
@@ -71,10 +67,6 @@ module "kubeadm_eastus2" {
   subnet_id                   = data.azurerm_subnet.op_useast2_subnet.id
   init_script_path            = "/Users/myprofile/Documents/github/bash_common_tools/startup-with-common-tools.sh"
   assign_public_ip            = false
-  # if assign_public_ip=false, no need for these vars
-  # public_ip_allocation_method = "Static"
-  # public_dns_zone_name        = azurerm_dns_zone.my_public_dns_zone.name
-  # public_dns_zone_rg          = azurerm_resource_group.rg_dns.name
   tags = {
     managed-by  = "personal tf project"
     description = "bastion host"
@@ -113,7 +105,6 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [azurerm_dns_a_record.record](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/dns_a_record) | resource |
 | [azurerm_linux_virtual_machine.vm](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine) | resource |
 | [azurerm_network_interface.networkInterface0](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_interface) | resource |
 | [azurerm_public_ip.publicIp1](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/public_ip) | resource |
@@ -134,8 +125,6 @@ No modules.
 | <a name="input_os_disk_caching"></a> [os\_disk\_caching](#input\_os\_disk\_caching) | The caching type for the OS disk (None, ReadOnly, ReadWrite). | `string` | `"ReadWrite"` | no |
 | <a name="input_os_disk_size_gb"></a> [os\_disk\_size\_gb](#input\_os\_disk\_size\_gb) | The size of the OS disk in GB. If not specified, uses the default size from the image. | `number` | `null` | no |
 | <a name="input_os_disk_type"></a> [os\_disk\_type](#input\_os\_disk\_type) | The storage account type for the OS disk (e.g., Standard\_LRS, Premium\_LRS, StandardSSD\_LRS). | `string` | `"Standard_LRS"` | no |
-| <a name="input_public_dns_zone_name"></a> [public\_dns\_zone\_name](#input\_public\_dns\_zone\_name) | The name of a pre-existing public DNS zone that the VM will be assigned to. If assign\_public\_ip=false, this variable should not be set. | `string` | `""` | no |
-| <a name="input_public_dns_zone_rg"></a> [public\_dns\_zone\_rg](#input\_public\_dns\_zone\_rg) | The resource group name of a pre-existing public DNS zone that the VM will be assigned to. If assign\_public\_ip=false, this variable should not be set. | `string` | `""` | no |
 | <a name="input_public_ip_allocation_method"></a> [public\_ip\_allocation\_method](#input\_public\_ip\_allocation\_method) | Public address is Dynamic or Static address | `string` | `"Dynamic"` | no |
 | <a name="input_rg_name"></a> [rg\_name](#input\_rg\_name) | The name of the Azure Resource Group in which resources will be created. | `string` | n/a | yes |
 | <a name="input_servername"></a> [servername](#input\_servername) | The name of the Linux virtual machine to be created. | `string` | n/a | yes |
@@ -143,6 +132,7 @@ No modules.
 | <a name="input_ssh_public_key_path"></a> [ssh\_public\_key\_path](#input\_ssh\_public\_key\_path) | Path to the SSH public key file to be added for admin access to the VM. | `string` | n/a | yes |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | The ID of the subnet to which the VM will be attached (e.g., /subscriptions/xxxx/resourceGroups/xxx/providers/Microsoft.Network/virtualNetworks/xxx/subnets/xxx). | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to assign to all resources. These will be merged with module-defined tags. | `map(string)` | `{}` | no |
+| <a name="input_user_assigned_identity_id"></a> [user\_assigned\_identity\_id](#input\_user\_assigned\_identity\_id) | A User Assigned Managed Identity ID to be assigned to the VM. If empty, SystemAssigned will be used. | `string` | `""` | no |
 
 ## Outputs
 
@@ -153,5 +143,6 @@ No modules.
 | <a name="output_public_ip_address"></a> [public\_ip\_address](#output\_public\_ip\_address) | The public IP address of the VM (if assigned). |
 | <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | The name of the resource group. |
 | <a name="output_vm_id"></a> [vm\_id](#output\_vm\_id) | The ID of the Linux virtual machine. |
+| <a name="output_vm_identity_principal_id"></a> [vm\_identity\_principal\_id](#output\_vm\_identity\_principal\_id) | The principal ID of the VM's identity. If SystemAssigned is used, this will be the VM's principal ID. |
 | <a name="output_vm_name"></a> [vm\_name](#output\_vm\_name) | The name of the Linux virtual machine. |
 <!-- END_TF_DOCS -->

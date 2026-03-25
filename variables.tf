@@ -75,14 +75,8 @@ variable "secure_boot_enabled" {
   default     = true
 }
 
-variable "public_dns_zone_name" {
-  description = "The name of a pre-existing public DNS zone that the VM will be assigned to. If assign_public_ip=false, this variable should not be set."
-  type        = string
-  default     = ""
-}
-
-variable "public_dns_zone_rg" {
-  description = "The resource group name of a pre-existing public DNS zone that the VM will be assigned to. If assign_public_ip=false, this variable should not be set."
+variable "user_assigned_identity_id" {
+  description = "A User Assigned Managed Identity ID to be assigned to the VM. If empty, SystemAssigned will be used."
   type        = string
   default     = ""
 }

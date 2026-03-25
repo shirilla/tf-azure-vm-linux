@@ -13,6 +13,11 @@ output "vm_id" {
   value       = azurerm_linux_virtual_machine.vm.id
 }
 
+output "vm_identity_principal_id" {
+  description = "The principal ID of the VM's identity. If SystemAssigned is used, this will be the VM's principal ID."
+  value       = try(azurerm_linux_virtual_machine.vm.identity[0].principal_id, null)
+}
+
 output "private_ip_address" {
   description = "The private IP address of the VM."
   value       = azurerm_network_interface.networkInterface0.private_ip_address

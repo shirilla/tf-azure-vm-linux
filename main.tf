@@ -50,21 +50,6 @@ resource "azurerm_public_ip" "publicIp1" {
 }
 
 #================================================================================
-# Public DNS
-#================================================================================
-resource "azurerm_dns_a_record" "record" {
-  count               = (var.assign_public_ip == true && 
-                        var.public_dns_zone_name != "" &&
-                        var.public_dns_zone_rg != ""
-                        )? 1 : 0
-  name                = var.servername
-  resource_group_name = var.public_dns_zone_rg
-  zone_name           = var.public_dns_zone_name
-  ttl                 = 60
-  records             = [azurerm_public_ip.publicIp1[count.index].ip_address]
-}
-
-#================================================================================
 # VM
 #================================================================================
 resource "azurerm_linux_virtual_machine" "vm" {
@@ -85,6 +70,11 @@ resource "azurerm_linux_virtual_machine" "vm" {
   network_interface_ids = [
     azurerm_network_interface.networkInterface0.id
   ]
+
+  identity {
+    type         = var.user_assigned_identity_id != "" ? "UserAssigned" : "SystemAssigned"
+    identity_ids = var.user_assigned_identity_id != "" ? [var.user_assigned_identity_id] : null
+  }
 
   os_disk {
     caching              = var.os_disk_caching
